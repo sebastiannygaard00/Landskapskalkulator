@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <title>Helningskalkulator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f3e7;
+      color: #4c5c44;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: #3a4e37;
+      margin-bottom: 20px;
+    }
+
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    input {
+      padding: 12px;
+      font-size: 1rem;
+      width: 250px;
+      border: 2px solid #a0c28f;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #4e8c53;
+      box-shadow: 0 0 8px rgba(78, 140, 83, 0.4);
+    }
+
+    button {
+      background-color: #80a369;
+      color: white;
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 260px;
+    }
+
+    button:hover {
+      background-color: #708d5d;
+    }
+
+    #result, #reverseResult {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #3a4e37;
+    }
+
+    .calc-result {
+      font-style: italic;
+      color: #7c8a56;
+    }
+
+    hr {
+      width: 80%;
+      border: 0;
+      height: 1px;
+      background-color: #a0c28f;
+      margin: 40px 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo-container {
+      margin-top: 30px;
+      text-align: right;
+    }
+
+    .logo-container img {
+      max-width: 200px;
+      height: auto;
+      opacity: 0.6;
+    }
+
+    input:disabled {
+      background-color: #e0e0e0;
+      cursor: not-allowed;
+    }
+
+    .small-input {
+      width: 60px;
+    }
+
+    .small-button {
+      height: 48px; /* Samme høyde som de andre knappene */
+      padding: 0 12px;
+      font-size: 0.95rem;
+      width: auto;
+    }
+
+    .inline-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Helningskalkulator</h2>
+
+    <div class="input-row">
+      <label for="heightDiff">Høydeforskjell (m):</label>
+      <input type="text" id="heightDiff">
+      <span class="calc-result" id="heightResult"></span>
+    </div>
+
+    <div class="input-row">
+      <label for="distance">Avstand (m):</label>
+      <input type="text" id="distance">
+    </div>
+
+    <button onclick="calculateSlope()">Regn ut</button>
+
+    <div id="result"></div>
+
+    <hr>
+
+    <h2>Beregn lengde på rampe</h2>
+
+    <div class="input-row">
+      <label for="heightInputReverse">Høydeforskjell (m):</label>
+      <input type="text" id="heightInputReverse">
+      <span class="calc-result" id="heightReverseResult"></span>
+    </div>
+
+    <div class="input-row">
+      <label for="slopeRatioInput">Stigningsforhold (1:X):</label>
+      <input type="text" id="slopeRatioInput" placeholder="X" oninput="toggleSlopeInput()">
+    </div>
+
+    <div class="input-row">
+      <label for="slopePercentageInput">Prosentvis helning (%):</label>
+      <input type="text" id="slopePercentageInput" oninput="toggleSlopeInput()">
+    </div>
+
+    <div class="input-row">
+      <label for="reposLength">Lengde på repos (m):</label>
+      <input type="text" id="reposLength">
+    </div>
+
+    <button onclick="calculateDistanceFromSlope()">Regn ut avstand</button>
+
+    <div id="reverseResult"></div>
+
+    <hr>
+
+    <h2>Omgjør stigningsforhold, prosent og grader</h2>
+
+    <!-- Stigningsforhold til prosent -->
+    <div class="inline-row">
+      <label for="ratioNumerator">Stigningsforhold:</label>
+      <input type="text" id="ratioNumerator" placeholder="" class="small-input">
+      <span>:</span>
+      <input type="text" id="ratioDenominator" placeholder="" class="small-input">
+      <button onclick="convertRatioToPercent()" class="small-button">Til prosent og grader</button>
+      <div id="ratioToPercentResult" class="calc-result"></div>
+    </div>
+
+    <!-- Prosent til stigningsforhold -->
+    <div class="inline-row">
+      <label for="percentInput">Prosent:</label>
+      <input type="text" id="percentInput" placeholder="" class="small-input">
+      <button onclick="convertPercentToRatio()" class="small-button">Til stigningsforhold og grader</button>
+      <div id="percentToRatioResult" class="calc-result"></div>
+    </div>
+
+    <!-- Grader til prosent og stigningsforhold -->
+<div class="inline-row">
+  <label for="angleInput">Grader:</label>
+  <input type="text" id="angleInput" placeholder="" class="small-input">
+  <button onclick="convertDegreesToSlope()" class="small-button">Til stigningsforhold og prosent</button>
+  <div id="degreesToSlopeResult" class="calc-result"></div>
+</div>
+
+
+  </div>
+
+  <div>
+    <br>
+    <p>Laget av Sebastian Nygaard</p>
+  </div>
+
+  <script>
+    function safeEval(input) {
+      try {
+        const sanitized = input.replace(/,/g, '.');
+        const result = eval(sanitized);
+        return typeof result === 'number' ? result : NaN;
+      } catch {
+        return NaN;
+      }
+    }
+
+    function calculateSlope() {
+      const heightInput = document.getElementById('heightDiff').value;
+      const distanceInput = document.getElementById('distance').value;
+
+      const height = safeEval(heightInput);
+      const distance = safeEval(distanceInput);
+
+      const heightDisplay = document.getElementById('heightResult');
+      if (!isNaN(height)) {
+        heightDisplay.textContent = `= ${height.toFixed(2)} m`;
+      } else {
+        heightDisplay.textContent = '';
+      }
+
+      if (isNaN(height) || isNaN(distance) || height === 0) {
+        document.getElementById('result').innerText = "Skriv inn høyde og avstand.";
+        return;
+      }
+
+      const slopeRatio = (distance / height).toFixed(2);
+      const slopePercentage = ((height / distance) * 100).toFixed(2);
+
+      document.getElementById('result').innerText = 
+        `Helningen er 1:${slopeRatio} eller ${slopePercentage}%`;
+    }
+
+    function calculateDistanceFromSlope() {
+      const heightInput = document.getElementById('heightInputReverse').value;
+      const slopeRatioInput = document.getElementById('slopeRatioInput').value;
+      const slopePercentageInput = document.getElementById('slopePercentageInput').value;
+      const reposInput = document.getElementById('reposLength').value;
+
+      const height = safeEval(heightInput);
+      const reposLength = safeEval(reposInput) || 0;
+
+      let slopeRatio = safeEval(slopeRatioInput);
+      let slopePercentage = safeEval(slopePercentageInput);
+
+      const heightDisplay = document.getElementById('heightReverseResult');
+      if (!isNaN(height)) {
+        heightDisplay.textContent = `= ${height.toFixed(2)} m`;
+      } else {
+        heightDisplay.textContent = '';
+      }
+
+      if (isNaN(height) || (isNaN(slopeRatio) && isNaN(slopePercentage))) {
+        document.getElementById('reverseResult').innerText = "Skriv inn gyldige verdier for høyde og helning.";
+        return;
+      }
+
+      if (!isNaN(slopePercentage)) {
+        slopeRatio = (100 / slopePercentage).toFixed(2);
+      }
+
+      const runLength = height * slopeRatio;
+      const total = runLength + reposLength;
+
+      document.getElementById('reverseResult').innerText =
+        `Avstanden blir ${runLength.toFixed(2)} m + ${reposLength.toFixed(2)} m repos = ${total.toFixed(2)} m totalt.`;
+    }
+
+    function toggleSlopeInput() {
+      const slopeRatioInput = document.getElementById('slopeRatioInput');
+      const slopePercentageInput = document.getElementById('slopePercentageInput');
+
+      if (slopeRatioInput.value !== "") {
+        slopePercentageInput.disabled = true;
+        slopePercentageInput.value = "";
+      } else if (slopePercentageInput.value !== "") {
+        slopeRatioInput.disabled = true;
+        slopeRatioInput.value = "";
+      } else {
+        slopePercentageInput.disabled = false;
+        slopeRatioInput.disabled = false;
+      }
+    }
+
+    function convertRatioToPercent() {
+      const numerator = safeEval(document.getElementById('ratioNumerator').value);
+      const denominator = safeEval(document.getElementById('ratioDenominator').value);
+
+      if (isNaN(numerator) || isNaN(denominator) || numerator === 0) {
+        document.getElementById('ratioToPercentResult').innerText = "Ugyldig input.";
+        return;
+      }
+
+      const percent = (numerator / denominator) * 100;
+      document.getElementById('ratioToPercentResult').innerText = `${percent.toFixed(2)}%`;
+    }
+
+    function convertPercentToRatio() {
+  const percent = safeEval(document.getElementById('percentInput').value);
+  if (isNaN(percent) || percent === 0) {
+    document.getElementById('percentToRatioResult').innerText = "Ugyldig input.";
+    return;
+  }
+
+  const ratio = 100 / percent;
+  const angleRadians = Math.atan(percent / 100);
+  const angleDegrees = angleRadians * (180 / Math.PI);
+
+  document.getElementById('percentToRatioResult').innerText =
+    `1:${ratio.toFixed(2)} og ${angleDegrees.toFixed(2)}°`;
+}
+
+    function convertRatioToPercent() {
+  const numerator = safeEval(document.getElementById('ratioNumerator').value);
+  const denominator = safeEval(document.getElementById('ratioDenominator').value);
+
+  if (isNaN(numerator) || isNaN(denominator) || numerator === 0) {
+    document.getElementById('ratioToPercentResult').innerText = "Ugyldig input.";
+    return;
+  }
+
+  const percent = (numerator / denominator) * 100;
+  const angleRadians = Math.atan(numerator / denominator);
+  const angleDegrees = angleRadians * (180 / Math.PI);
+
+  document.getElementById('ratioToPercentResult').innerText =
+    `${percent.toFixed(2)}% og ${angleDegrees.toFixed(2)}°`;
+}
+
+function convertDegreesToSlope() {
+  const angle = safeEval(document.getElementById('angleInput').value);
+  if (isNaN(angle)) {
+    document.getElementById('degreesToSlopeResult').innerText = "Ugyldig input.";
+    return;
+  }
+
+  const radians = angle * (Math.PI / 180);
+  const slopeDecimal = Math.tan(radians);
+
+  const percent = slopeDecimal * 100;
+  const ratio = 1 / slopeDecimal;
+
+  document.getElementById('degreesToSlopeResult').innerText =
+    `1:${ratio.toFixed(2)} og ${percent.toFixed(2)}%`;
+}
+
+
+    document.getElementById('heightDiff').addEventListener('blur', calculateSlope);
+    document.getElementById('distance').addEventListener('blur', calculateSlope);
+    document.getElementById('heightInputReverse').addEventListener('blur', calculateDistanceFromSlope);
+  </script>
+
+</body>
+</html>
