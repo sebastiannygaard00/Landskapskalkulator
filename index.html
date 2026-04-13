@@ -46,6 +46,7 @@
     input:focus {
       border-color: #4e8c53;
       box-shadow: 0 0 8px rgba(78, 140, 83, 0.4);
+      outline: none;
     }
 
     button {
@@ -119,7 +120,7 @@
     }
 
     .small-button {
-      height: 48px; /* Samme høyde som de andre knappene */
+      height: 48px;
       padding: 0 12px;
       font-size: 0.95rem;
       width: auto;
@@ -132,87 +133,313 @@
       margin-bottom: 15px;
       flex-wrap: nowrap;
     }
+
+    /* --- FANER --- */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 10px 24px;
+      font-size: 0.95rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #9aab90;
+      cursor: pointer;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: #3a4e37;
+      border-bottom: 2px solid #80a369;
+      font-weight: 500;
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: #4c5c44;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* --- TRAPPEKALKULATOR --- */
+    .stair-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stair-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stair-input-group label {
+      font-size: 0.85rem;
+      color: #4c5c44;
+    }
+
+    .stair-input-group input {
+      width: 100%;
+    }
+
+    .result-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .result-card {
+      background: #f0f4eb;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #a0c28f;
+    }
+
+    .result-card .lbl {
+      font-size: 0.75rem;
+      color: #7c8a56;
+      margin-bottom: 4px;
+    }
+
+    .result-card input.card-input {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #3a4e37;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      width: 100%;
+      text-align: center;
+      padding: 2px 0;
+      border-radius: 0;
+      box-shadow: none;
+      transition: border-color 0.2s;
+    }
+
+    .result-card input.card-input:focus {
+      outline: none;
+      border-bottom: 2px solid #80a369;
+      box-shadow: none;
+    }
+
+    .result-card .card-unit {
+      font-size: 0.8rem;
+      color: #7c8a56;
+      margin-top: 2px;
+    }
+
+    .result-card .card-info {
+      font-size: 0.72rem;
+      color: #7c8a56;
+      font-style: italic;
+      margin-top: 3px;
+      min-height: 1em;
+    }
+
+    .adjust-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .adjust-row label {
+      font-size: 1rem;
+      min-width: 160px;
+    }
+
+    .adjust-row input {
+      width: 120px;
+    }
+
+    .canvas-wrap {
+      border: 2px solid #a0c28f;
+      border-radius: 8px;
+      margin: 20px 0;
+      overflow: hidden;
+      background: #fafdf7;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+    }
+
+    .repos-section {
+      background: #f5f3e7;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 10px;
+      border: 1px solid #a0c28f;
+    }
+
+    .repos-section h2 {
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+
+    .warning-msg {
+      color: #7a4e00;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      margin: 10px 0;
+      display: none;
+    }
+
+    .warning-msg.visible {
+      display: block;
+    }
   </style>
 </head>
 <body>
 
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="byttFane('helling')">Helningskalkulator</button>
+    <button class="tab-btn" onclick="byttFane('trapp')">Trappekalkulator</button>
+  </div>
+
   <div class="container">
-    <h2>Helningskalkulator</h2>
 
-    <div class="input-row">
-      <label for="heightDiff">Høydeforskjell (m):</label>
-      <input type="text" id="heightDiff">
-      <span class="calc-result" id="heightResult"></span>
+    <!-- ===================== HELNINGSKALKULATOR ===================== -->
+    <div id="tab-helling" class="tab-content active">
+
+      <h2>Helningskalkulator</h2>
+
+      <div class="input-row">
+        <label for="heightDiff">Høydeforskjell (m):</label>
+        <input type="text" id="heightDiff">
+        <span class="calc-result" id="heightResult"></span>
+      </div>
+
+      <div class="input-row">
+        <label for="distance">Avstand (m):</label>
+        <input type="text" id="distance">
+      </div>
+
+      <button onclick="calculateSlope()">Regn ut</button>
+
+      <div id="result"></div>
+
+      <hr>
+
+      <h2>Beregn lengde på rampe</h2>
+
+      <div class="input-row">
+        <label for="heightInputReverse">Høydeforskjell (m):</label>
+        <input type="text" id="heightInputReverse">
+        <span class="calc-result" id="heightReverseResult"></span>
+      </div>
+
+      <div class="input-row">
+        <label for="slopeRatioInput">Stigningsforhold (1:X):</label>
+        <input type="text" id="slopeRatioInput" placeholder="X" oninput="toggleSlopeInput()">
+      </div>
+
+      <div class="input-row">
+        <label for="slopePercentageInput">Prosentvis helning (%):</label>
+        <input type="text" id="slopePercentageInput" oninput="toggleSlopeInput()">
+      </div>
+
+      <div class="input-row">
+        <label for="reposLength">Lengde på repos (m):</label>
+        <input type="text" id="reposLength">
+      </div>
+
+      <button onclick="calculateDistanceFromSlope()">Regn ut avstand</button>
+
+      <div id="reverseResult"></div>
+
+      <hr>
+
+      <h2>Omgjør stigningsforhold, prosent og grader</h2>
+
+      <div class="inline-row">
+        <label for="ratioNumerator">Stigningsforhold:</label>
+        <input type="text" id="ratioNumerator" placeholder="" class="small-input">
+        <span>:</span>
+        <input type="text" id="ratioDenominator" placeholder="" class="small-input">
+        <button onclick="convertRatioToPercent()" class="small-button">Til prosent og grader</button>
+        <div id="ratioToPercentResult" class="calc-result"></div>
+      </div>
+
+      <div class="inline-row">
+        <label for="percentInput">Prosent:</label>
+        <input type="text" id="percentInput" placeholder="" class="small-input">
+        <button onclick="convertPercentToRatio()" class="small-button">Til stigningsforhold og grader</button>
+        <div id="percentToRatioResult" class="calc-result"></div>
+      </div>
+
+      <div class="inline-row">
+        <label for="angleInput">Grader:</label>
+        <input type="text" id="angleInput" placeholder="" class="small-input">
+        <button onclick="convertDegreesToSlope()" class="small-button">Til stigningsforhold og prosent</button>
+        <div id="degreesToSlopeResult" class="calc-result"></div>
+      </div>
+
     </div>
+    <!-- ===================== TRAPPEKALKULATOR ===================== -->
+    <div id="tab-trapp" class="tab-content">
 
-    <div class="input-row">
-      <label for="distance">Avstand (m):</label>
-      <input type="text" id="distance">
+      <h2>Trappekalkulator</h2>
+
+      <!-- 2D-tegning øverst, alltid synlig -->
+      <div class="canvas-wrap">
+        <canvas id="trappCanvas" width="740" height="360"></canvas>
+      </div>
+
+      <div class="stair-grid">
+        <div class="stair-input-group">
+          <label>Kotehøyde bunn (m)</label>
+          <input type="number" id="koteButnn" step="0.001" placeholder="f.eks. 12.350">
+        </div>
+        <div class="stair-input-group">
+          <label>Kotehøyde topp (m)</label>
+          <input type="number" id="koteTopp" step="0.001" placeholder="f.eks. 13.500">
+        </div>
+        <div class="stair-input-group">
+          <label>Total trappelengde (m) – valgfri</label>
+          <input type="number" id="trappeLengde" step="0.01" placeholder="f.eks. 4.00">
+        </div>
+      </div>
+
+      <button onclick="beregnTrapp()">Beregn trapp</button>
+
+      <div id="trappResultContainer" style="display:none">
+
+        <div class="result-cards" id="trappCards"></div>
+
+        <div id="warningMsg" class="warning-msg"></div>
+
+        <div class="repos-section">
+          <h2>Repos (vileplan)</h2>
+          <div id="reposList"></div>
+          <button onclick="leggTilRepos()" style="width:auto; padding:10px 18px; font-size:0.95rem; margin-top:6px;">+ Legg til repos</button>
+        </div>
+
+      </div>
     </div>
-
-    <button onclick="calculateSlope()">Regn ut</button>
-
-    <div id="result"></div>
-
-    <hr>
-
-    <h2>Beregn lengde på rampe</h2>
-
-    <div class="input-row">
-      <label for="heightInputReverse">Høydeforskjell (m):</label>
-      <input type="text" id="heightInputReverse">
-      <span class="calc-result" id="heightReverseResult"></span>
-    </div>
-
-    <div class="input-row">
-      <label for="slopeRatioInput">Stigningsforhold (1:X):</label>
-      <input type="text" id="slopeRatioInput" placeholder="X" oninput="toggleSlopeInput()">
-    </div>
-
-    <div class="input-row">
-      <label for="slopePercentageInput">Prosentvis helning (%):</label>
-      <input type="text" id="slopePercentageInput" oninput="toggleSlopeInput()">
-    </div>
-
-    <div class="input-row">
-      <label for="reposLength">Lengde på repos (m):</label>
-      <input type="text" id="reposLength">
-    </div>
-
-    <button onclick="calculateDistanceFromSlope()">Regn ut avstand</button>
-
-    <div id="reverseResult"></div>
-
-    <hr>
-
-    <h2>Omgjør stigningsforhold, prosent og grader</h2>
-
-    <!-- Stigningsforhold til prosent -->
-    <div class="inline-row">
-      <label for="ratioNumerator">Stigningsforhold:</label>
-      <input type="text" id="ratioNumerator" placeholder="" class="small-input">
-      <span>:</span>
-      <input type="text" id="ratioDenominator" placeholder="" class="small-input">
-      <button onclick="convertRatioToPercent()" class="small-button">Til prosent og grader</button>
-      <div id="ratioToPercentResult" class="calc-result"></div>
-    </div>
-
-    <!-- Prosent til stigningsforhold -->
-    <div class="inline-row">
-      <label for="percentInput">Prosent:</label>
-      <input type="text" id="percentInput" placeholder="" class="small-input">
-      <button onclick="convertPercentToRatio()" class="small-button">Til stigningsforhold og grader</button>
-      <div id="percentToRatioResult" class="calc-result"></div>
-    </div>
-
-    <!-- Grader til prosent og stigningsforhold -->
-<div class="inline-row">
-  <label for="angleInput">Grader:</label>
-  <input type="text" id="angleInput" placeholder="" class="small-input">
-  <button onclick="convertDegreesToSlope()" class="small-button">Til stigningsforhold og prosent</button>
-  <div id="degreesToSlopeResult" class="calc-result"></div>
-</div>
-
 
   </div>
 
@@ -221,11 +448,21 @@
     <p><em>Laget av Sebastian Nygaard for LINK Landskap</em></p>
   </div>
 
-   <div class="logo-container">
+  <div class="logo-container">
     <img src="LINK_logo_Black_small-filesize.png" alt="LINK Arkitektur">
   </div>
 
   <script>
+    // ===================== FANEBYTTE =====================
+    function byttFane(fane) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + fane).classList.add('active');
+      const idx = fane === 'helling' ? 0 : 1;
+      document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    }
+
+    // ===================== HELNINGSKALKULATOR (uendret) =====================
     function safeEval(input) {
       try {
         const sanitized = input.replace(/,/g, '.');
@@ -258,7 +495,7 @@
       const slopeRatio = (distance / height).toFixed(2);
       const slopePercentage = ((height / distance) * 100).toFixed(2);
 
-      document.getElementById('result').innerText = 
+      document.getElementById('result').innerText =
         `Helningen er 1:${slopeRatio} eller ${slopePercentage}%`;
     }
 
@@ -313,6 +550,21 @@
       }
     }
 
+    function convertPercentToRatio() {
+      const percent = safeEval(document.getElementById('percentInput').value);
+      if (isNaN(percent) || percent === 0) {
+        document.getElementById('percentToRatioResult').innerText = "Ugyldig input.";
+        return;
+      }
+
+      const ratio = 100 / percent;
+      const angleRadians = Math.atan(percent / 100);
+      const angleDegrees = angleRadians * (180 / Math.PI);
+
+      document.getElementById('percentToRatioResult').innerText =
+        `1:${ratio.toFixed(2)} og ${angleDegrees.toFixed(2)}°`;
+    }
+
     function convertRatioToPercent() {
       const numerator = safeEval(document.getElementById('ratioNumerator').value);
       const denominator = safeEval(document.getElementById('ratioDenominator').value);
@@ -323,62 +575,333 @@
       }
 
       const percent = (numerator / denominator) * 100;
-      document.getElementById('ratioToPercentResult').innerText = `${percent.toFixed(2)}%`;
+      const angleRadians = Math.atan(numerator / denominator);
+      const angleDegrees = angleRadians * (180 / Math.PI);
+
+      document.getElementById('ratioToPercentResult').innerText =
+        `${percent.toFixed(2)}% og ${angleDegrees.toFixed(2)}°`;
     }
 
-    function convertPercentToRatio() {
-  const percent = safeEval(document.getElementById('percentInput').value);
-  if (isNaN(percent) || percent === 0) {
-    document.getElementById('percentToRatioResult').innerText = "Ugyldig input.";
-    return;
-  }
+    function convertDegreesToSlope() {
+      const angle = safeEval(document.getElementById('angleInput').value);
+      if (isNaN(angle)) {
+        document.getElementById('degreesToSlopeResult').innerText = "Ugyldig input.";
+        return;
+      }
 
-  const ratio = 100 / percent;
-  const angleRadians = Math.atan(percent / 100);
-  const angleDegrees = angleRadians * (180 / Math.PI);
+      const radians = angle * (Math.PI / 180);
+      const slopeDecimal = Math.tan(radians);
 
-  document.getElementById('percentToRatioResult').innerText =
-    `1:${ratio.toFixed(2)} og ${angleDegrees.toFixed(2)}°`;
-}
+      const percent = slopeDecimal * 100;
+      const ratio = 1 / slopeDecimal;
 
-    function convertRatioToPercent() {
-  const numerator = safeEval(document.getElementById('ratioNumerator').value);
-  const denominator = safeEval(document.getElementById('ratioDenominator').value);
-
-  if (isNaN(numerator) || isNaN(denominator) || numerator === 0) {
-    document.getElementById('ratioToPercentResult').innerText = "Ugyldig input.";
-    return;
-  }
-
-  const percent = (numerator / denominator) * 100;
-  const angleRadians = Math.atan(numerator / denominator);
-  const angleDegrees = angleRadians * (180 / Math.PI);
-
-  document.getElementById('ratioToPercentResult').innerText =
-    `${percent.toFixed(2)}% og ${angleDegrees.toFixed(2)}°`;
-}
-
-function convertDegreesToSlope() {
-  const angle = safeEval(document.getElementById('angleInput').value);
-  if (isNaN(angle)) {
-    document.getElementById('degreesToSlopeResult').innerText = "Ugyldig input.";
-    return;
-  }
-
-  const radians = angle * (Math.PI / 180);
-  const slopeDecimal = Math.tan(radians);
-
-  const percent = slopeDecimal * 100;
-  const ratio = 1 / slopeDecimal;
-
-  document.getElementById('degreesToSlopeResult').innerText =
-    `1:${ratio.toFixed(2)} og ${percent.toFixed(2)}%`;
-}
-
+      document.getElementById('degreesToSlopeResult').innerText =
+        `1:${ratio.toFixed(2)} og ${percent.toFixed(2)}%`;
+    }
 
     document.getElementById('heightDiff').addEventListener('blur', calculateSlope);
     document.getElementById('distance').addEventListener('blur', calculateSlope);
     document.getElementById('heightInputReverse').addEventListener('blur', calculateDistanceFromSlope);
+
+    // ===================== TRAPPEKALKULATOR =====================
+    // Alle interne mål lagres i cm
+    let stairState = null;
+
+    function fmt(cm) {
+      // Under 100 cm → vis i cm, ellers i meter
+      if (Math.abs(cm) < 100) return cm.toFixed(1) + ' cm';
+      return (cm / 100).toFixed(2) + ' m';
+    }
+
+    function beregnTrapp() {
+      const bunn = parseFloat(document.getElementById('koteButnn').value);
+      const topp = parseFloat(document.getElementById('koteTopp').value);
+      const lengdeM = parseFloat(document.getElementById('trappeLengde').value);
+
+      if (isNaN(bunn) || isNaN(topp) || topp <= bunn) {
+        alert('Skriv inn gyldige kotehøyder (topp må være høyere enn bunn).');
+        return;
+      }
+
+      const hoydeCm = Math.round((topp - bunn) * 100 * 10) / 10;
+
+      // Finn optimalt antall trinn (ideell 13–15 cm, aksepterer 12–16 cm)
+      let bestN = null, bestScore = Infinity;
+      for (let n = 1; n <= 60; n++) {
+        const th = hoydeCm / n;
+        if (th < 12 || th > 16) continue;
+        const score = Math.abs(th - 14) + (th < 13 || th > 15 ? 1.5 : 0);
+        if (score < bestScore) { bestScore = score; bestN = n; }
+      }
+      if (!bestN) { bestN = Math.round(hoydeCm / 14); if (bestN < 1) bestN = 1; }
+
+      const thCm = Math.round((hoydeCm / bestN) * 10) / 10;
+      let tlCm;
+      if (!isNaN(lengdeM)) {
+        tlCm = Math.round(((lengdeM * 100) / bestN) * 10) / 10;
+      } else {
+        // Prefer 31–36 cm, aim for midpoint 33 cm
+        const raw = Math.round((63 - 2 * thCm) * 10) / 10;
+        tlCm = Math.min(36, Math.max(31, raw));
+      }
+
+      stairState = { hoydeCm, antall: bestN, trinnHoyde: thCm, trinnLengde: tlCm };
+      document.getElementById('trappResultContainer').style.display = 'block';
+      oppdaterKort();
+      tegn();
+    }
+
+    function oppdaterKort() {
+      if (!stairState) return;
+      const { hoydeCm, antall, trinnHoyde, trinnLengde } = stairState;
+
+      const reposer = hentReposer(antall);
+      const totalReposCm = reposer.reduce((s, r) => s + r.lengde, 0);
+      const totalLengdeCm = antall * trinnLengde + totalReposCm;
+      const oppnaaddHoyde = Math.round(antall * trinnHoyde * 10) / 10;
+      document.getElementById('trappCards').innerHTML = `
+        <div class="result-card">
+          <div class="lbl">Antall trinn</div>
+          <input class="card-input" type="number" min="1" max="60" step="1"
+            value="${antall}" oninput="kortEndret('antall', this.value)">
+          <div class="card-unit">&nbsp;</div>
+          <div class="card-info">&nbsp;</div>
+        </div>
+        <div class="result-card">
+          <div class="lbl">Trinnhøyde</div>
+          <input class="card-input" type="number" step="0.1"
+            value="${trinnHoyde}" oninput="kortEndret('hoyde', this.value)">
+          <div class="card-unit">cm</div>
+          <div class="card-info">&nbsp;</div>
+        </div>
+        <div class="result-card">
+          <div class="lbl">Trinnlengde</div>
+          <input class="card-input" type="number" step="0.1"
+            value="${trinnLengde}" oninput="kortEndret('lengde', this.value)">
+          <div class="card-unit">cm</div>
+          <div class="card-info">&nbsp;</div>
+        </div>
+        <div class="result-card">
+          <div class="lbl">Ønsket høyde</div>
+          <input class="card-input" type="text" readonly
+            value="${fmt(hoydeCm)}" style="cursor:default;color:#7c8a56">
+          <div class="card-unit">&nbsp;</div>
+          <div class="card-info">&nbsp;</div>
+        </div>
+        <div class="result-card">
+          <div class="lbl">Oppnådd høyde</div>
+          <input class="card-input" type="text" readonly
+            value="${fmt(oppnaaddHoyde)}" style="cursor:default;color:#7c8a56">
+          <div class="card-unit">&nbsp;</div>
+          <div class="card-info">&nbsp;</div>
+        </div>
+        <div class="result-card">
+          <div class="lbl">Total lengde</div>
+          <input class="card-input" type="text" readonly
+            value="${fmt(totalLengdeCm)}" style="cursor:default;color:#7c8a56">
+          <div class="card-unit">&nbsp;</div>
+          <div class="card-info">&nbsp;</div>
+        </div>
+      `;
+
+      // Advarsel
+      const avvik = Math.round((oppnaaddHoyde - hoydeCm) * 10) / 10;
+      const warnEl = document.getElementById('warningMsg');
+      const msgs = [];
+      if (Math.abs(avvik) > 0.1)
+        msgs.push(`Avvik: ${antall} × ${trinnHoyde} cm = ${oppnaaddHoyde} cm (ønsket ${hoydeCm} cm, diff ${avvik > 0 ? '+' : ''}${avvik} cm)`);
+      if (trinnHoyde < 12 || trinnHoyde > 16)
+        msgs.push(`Trinnhøyde ${trinnHoyde} cm er utenfor anbefalt område (12–16 cm)`);
+      else if (trinnHoyde < 13 || trinnHoyde > 15)
+        msgs.push(`Trinnhøyde ${trinnHoyde} cm er akseptabel, men utenfor idealområdet 13–15 cm`);
+      warnEl.innerHTML = msgs.join('<br>');
+      warnEl.classList.toggle('visible', msgs.length > 0);
+    }
+
+    function kortEndret(felt, val) {
+      if (!stairState) return;
+      const v = parseFloat(val);
+      if (isNaN(v) || v <= 0) return;
+      if (felt === 'antall') {
+        stairState.antall = Math.round(v);
+        stairState.trinnHoyde = Math.round((stairState.hoydeCm / stairState.antall) * 10) / 10;
+      } else if (felt === 'hoyde') {
+        stairState.trinnHoyde = v;
+        stairState.antall = Math.round(stairState.hoydeCm / v);
+      } else if (felt === 'lengde') {
+        stairState.trinnLengde = v;
+      }
+      oppdaterKort();
+      tegn();
+    }
+
+    function tegn() {
+      const state = stairState || { hoydeCm: 70, antall: 5, trinnHoyde: 14, trinnLengde: 30 };
+      const { antall, trinnHoyde, trinnLengde } = state;
+
+      const reposer = stairState ? hentReposer(antall) : [];
+
+      const canvas = document.getElementById('trappCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const totalHoyCm = antall * trinnHoyde;
+      const totalReposCmTegn = reposer.reduce((s, r) => s + r.lengde, 0);
+      const totalLengdeCm = antall * trinnLengde + totalReposCmTegn;
+
+      const padLeft = 72, padRight = 90, padTop = 46, padBottom = 46;
+      const drawW = W - padLeft - padRight;
+      const drawH = H - padTop - padBottom;
+      const sc = Math.min(drawW / totalLengdeCm, drawH / totalHoyCm);
+
+      const offX = padLeft;
+      const offY = padTop + drawH - totalHoyCm * sc;
+
+      // Trapp-form
+      ctx.beginPath();
+      ctx.moveTo(offX, offY + totalHoyCm * sc);
+      let cx = offX, cy = offY + totalHoyCm * sc;
+      for (let i = 0; i < antall; i++) {
+        ctx.lineTo(cx, cy - trinnHoyde * sc);
+        cy -= trinnHoyde * sc;
+        const reposHer = reposer.find(r => r.etterTrinn === i + 1);
+        if (reposHer) {
+          ctx.lineTo(cx + reposHer.lengde * sc, cy);
+          cx += reposHer.lengde * sc;
+        }
+        ctx.lineTo(cx + trinnLengde * sc, cy);
+        cx += trinnLengde * sc;
+      }
+      ctx.lineTo(cx, offY + totalHoyCm * sc);
+      ctx.closePath();
+      ctx.fillStyle = '#e8f0e0';
+      ctx.fill();
+      ctx.strokeStyle = '#4e8c53';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.font = '12px Segoe UI, sans-serif';
+
+      // Pil: trinnhøyde
+      const phX = offX - 24;
+      const phY0 = offY + totalHoyCm * sc;
+      const phY1 = offY + (totalHoyCm - trinnHoyde) * sc;
+      tegnPilLinje(ctx, phX, phY0, phX, phY1, '#80a369');
+      ctx.fillStyle = '#4e8c53'; ctx.textAlign = 'right';
+      ctx.fillText(fmt(trinnHoyde), phX - 4, (phY0 + phY1) / 2 + 4);
+
+      // Pil: trinnlengde
+      const plY = offY + totalHoyCm * sc + 22;
+      tegnPilLinje(ctx, offX, plY, offX + trinnLengde * sc, plY, '#80a369');
+      ctx.fillStyle = '#4e8c53'; ctx.textAlign = 'center';
+      ctx.fillText(fmt(trinnLengde), offX + trinnLengde * sc / 2, plY + 14);
+
+      // Pil: total høyde
+      const thX = cx + 22;
+      tegnPilLinje(ctx, thX, offY + totalHoyCm * sc, thX, offY, '#3a4e37');
+      ctx.fillStyle = '#3a4e37'; ctx.textAlign = 'left';
+      ctx.fillText('H = ' + fmt(totalHoyCm), thX + 5, (offY + totalHoyCm * sc + offY) / 2 + 4);
+
+      // Pil: total lengde
+      const tlY = offY - 20;
+      tegnPilLinje(ctx, offX, tlY, cx, tlY, '#3a4e37');
+      ctx.fillStyle = '#3a4e37'; ctx.textAlign = 'center';
+      ctx.fillText('L = ' + fmt(totalLengdeCm), (offX + cx) / 2, tlY - 6);
+
+      // Repos-labels
+      let labelOffset = 22;
+      reposer.forEach(r => {
+        // beregn x-posisjon: trinn før repos + alle tidligere reposer
+        let rx = offX;
+        let cumulativeRepos = 0;
+        reposer.forEach(r2 => { if (r2.etterTrinn < r.etterTrinn) cumulativeRepos += r2.lengde; });
+        rx += r.etterTrinn * trinnLengde * sc + cumulativeRepos * sc;
+        const ry = offY + (totalHoyCm - r.etterTrinn * trinnHoyde) * sc;
+        tegnPilLinje(ctx, rx, ry + labelOffset, rx + r.lengde * sc, ry + labelOffset, '#8a6e2f');
+        ctx.fillStyle = '#8a6e2f'; ctx.textAlign = 'center';
+        ctx.font = '11px Segoe UI, sans-serif';
+        ctx.fillText('Repos ' + r.etterTrinn + ': ' + fmt(r.lengde), rx + r.lengde * sc / 2, ry + labelOffset + 14);
+        labelOffset += 18;
+      });
+    }
+
+    // ---- REPOS-HÅNDTERING ----
+    let reposListe = []; // [{etterTrinn, lengde}, ...]
+
+    function hentReposer(antall) {
+      return reposListe.filter(r => r.etterTrinn > 0 && r.etterTrinn < antall && r.lengde > 0);
+    }
+
+    function leggTilRepos() {
+      reposListe.push({ etterTrinn: 0, lengde: 120 });
+      renderReposList();
+      tegn();
+    }
+
+    function fjernRepos(idx) {
+      reposListe.splice(idx, 1);
+      renderReposList();
+      tegn();
+    }
+
+    function oppdaterRepos(idx, felt, val) {
+      const v = parseFloat(val);
+      if (!isNaN(v)) reposListe[idx][felt] = v;
+      tegn();
+    }
+
+    function renderReposList() {
+      const container = document.getElementById('reposList');
+      if (!container) return;
+      container.innerHTML = '';
+      reposListe.forEach((r, i) => {
+        const row = document.createElement('div');
+        row.className = 'adjust-row';
+        row.style.cssText = 'align-items:center; gap:12px; margin-bottom:10px; flex-wrap:nowrap;';
+        row.innerHTML = `
+          <span style="font-size:0.9rem; color:#4c5c44; white-space:nowrap;">Repos ${i+1} etter trinn nr.</span>
+          <input type="number" min="1" step="1" value="${r.etterTrinn || ''}"
+            placeholder="trinn" style="width:80px;"
+            oninput="oppdaterRepos(${i}, 'etterTrinn', this.value)">
+          <span style="font-size:0.9rem; color:#4c5c44; white-space:nowrap;">Lengde (cm)</span>
+          <input type="number" min="1" step="1" value="${r.lengde || ''}"
+            placeholder="cm" style="width:90px;"
+            oninput="oppdaterRepos(${i}, 'lengde', this.value)">
+          <button onclick="fjernRepos(${i})"
+            style="width:auto; padding:6px 12px; font-size:0.85rem; background:#c0392b;">✕</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function tegnPilLinje(ctx, x1, y1, x2, y2, farge) {
+      ctx.save();
+      ctx.strokeStyle = farge; ctx.fillStyle = farge; ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.setLineDash([]);
+      tegnPilspiss(ctx, x1, y1, x2, y2);
+      tegnPilspiss(ctx, x2, y2, x1, y1);
+      ctx.restore();
+    }
+
+    function tegnPilspiss(ctx, tipX, tipY, fromX, fromY) {
+      const ang = Math.atan2(tipY - fromY, tipX - fromX);
+      const len = 7;
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(tipX - len * Math.cos(ang - 0.35), tipY - len * Math.sin(ang - 0.35));
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(tipX - len * Math.cos(ang + 0.35), tipY - len * Math.sin(ang + 0.35));
+      ctx.stroke();
+    }
+
+
+    // Tegn standardtrapp ved sideinnlasting
+    window.addEventListener('DOMContentLoaded', function() {
+      tegn();
+    });
   </script>
 
 </body>
