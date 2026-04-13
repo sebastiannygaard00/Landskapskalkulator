@@ -272,24 +272,20 @@
     }
 
     .canvas-wrap {
-      border: 2px solid #a0c28f;
-      border-radius: 8px;
       margin: 20px 0;
       overflow: hidden;
-      background: #fafdf7;
+      height: 340px;
     }
 
     canvas {
       display: block;
       width: 100%;
+      height: 100%;
     }
 
     .repos-section {
-      background: #f5f3e7;
-      border-radius: 8px;
-      padding: 20px;
+      padding: 20px 0;
       margin-top: 10px;
-      border: 1px solid #a0c28f;
     }
 
     .repos-section h2 {
@@ -412,15 +408,15 @@
       <div class="stair-grid">
         <div class="stair-input-group">
           <label>Kotehøyde bunn (m)</label>
-          <input type="number" id="koteButnn" step="0.001" placeholder="f.eks. 12.350">
+          <input type="text" id="koteButnn" placeholder="f.eks. 12.350">
         </div>
         <div class="stair-input-group">
           <label>Kotehøyde topp (m)</label>
-          <input type="number" id="koteTopp" step="0.001" placeholder="f.eks. 13.500">
+          <input type="text" id="koteTopp" placeholder="f.eks. 13.500">
         </div>
         <div class="stair-input-group">
           <label>Total trappelengde (m) – valgfri</label>
-          <input type="number" id="trappeLengde" step="0.01" placeholder="f.eks. 4.00">
+          <input type="text" id="trappeLengde" placeholder="f.eks. 4.00" onfocus="forhandsvisTrappeLengde()">
         </div>
       </div>
 
@@ -433,7 +429,7 @@
         <div id="warningMsg" class="warning-msg"></div>
 
         <div class="repos-section">
-          <h2>Repos (vileplan)</h2>
+          <h2>Repos (hvileplan)</h2>
           <div id="reposList"></div>
           <button onclick="leggTilRepos()" style="width:auto; padding:10px 18px; font-size:0.95rem; margin-top:6px;">+ Legg til repos</button>
         </div>
@@ -613,10 +609,31 @@
       return (cm / 100).toFixed(2) + ' m';
     }
 
+    function forhandsvisTrappeLengde() {
+      // Vis en forhåndsvisning med 15cm opptrinn og 32cm inntrinn når lengdefeltet fokuseres
+      const bunn = safeEval(document.getElementById('koteButnn').value || '');
+      const topp = safeEval(document.getElementById('koteTopp').value || '');
+      if (isNaN(bunn) || isNaN(topp) || topp <= bunn) return;
+      const hoydeCm = Math.round((topp - bunn) * 100 * 10) / 10;
+      const antall = Math.round(hoydeCm / 15);
+      const thCm = Math.round((hoydeCm / antall) * 10) / 10;
+      const tlCm = 32;
+      const totalLengdeM = (antall * tlCm / 100).toFixed(2);
+      // Sett forslag i lengdefeltet
+      const lengdeFelt = document.getElementById('trappeLengde');
+      if (!lengdeFelt.value) lengdeFelt.placeholder = 'Forslag: ' + parseFloat(totalLengdeM).toFixed(1).replace('.', ',') + ' m';
+      // Vis forhåndsvisning i tegning
+      stairState = { hoydeCm, antall, trinnHoyde: thCm, trinnLengde: tlCm };
+      document.getElementById('trappResultContainer').style.display = 'block';
+      oppdaterKort();
+      tegn();
+    }
+
     function beregnTrapp() {
-      const bunn = parseFloat(document.getElementById('koteButnn').value);
-      const topp = parseFloat(document.getElementById('koteTopp').value);
-      const lengdeM = parseFloat(document.getElementById('trappeLengde').value);
+      const bunn = safeEval(document.getElementById('koteButnn').value || '');
+      const topp = safeEval(document.getElementById('koteTopp').value || '');
+      const lengdeRaw = document.getElementById('trappeLengde').value;
+      const lengdeM = safeEval(lengdeRaw || '');
 
       if (isNaN(bunn) || isNaN(topp) || topp <= bunn) {
         alert('Skriv inn gyldige kotehøyder (topp må være høyere enn bunn).');
@@ -663,21 +680,33 @@
         <div class="result-card">
           <div class="lbl">Antall trinn</div>
           <input class="card-input" type="number" min="1" max="60" step="1"
-            value="${antall}" oninput="kortEndret('antall', this.value)">
+            value="${antall}"
+            onchange="kortEndret('antall', this.value)"
+            onkeydown="kortTast(event, 'antall', this)"
+            onmousedown="startSpin(event, 'antall', this)"
+           >
           <div class="card-unit">&nbsp;</div>
           <div class="card-info">&nbsp;</div>
         </div>
         <div class="result-card">
           <div class="lbl">Trinnhøyde</div>
           <input class="card-input" type="number" step="0.1"
-            value="${trinnHoyde}" oninput="kortEndret('hoyde', this.value)">
+            value="${trinnHoyde}"
+            onchange="kortEndret('hoyde', this.value)"
+            onkeydown="kortTast(event, 'hoyde', this)"
+            onmousedown="startSpin(event, 'hoyde', this)"
+           >
           <div class="card-unit">cm</div>
           <div class="card-info">&nbsp;</div>
         </div>
         <div class="result-card">
           <div class="lbl">Trinnlengde</div>
           <input class="card-input" type="number" step="0.1"
-            value="${trinnLengde}" oninput="kortEndret('lengde', this.value)">
+            value="${trinnLengde}"
+            onchange="kortEndret('lengde', this.value)"
+            onkeydown="kortTast(event, 'lengde', this)"
+            onmousedown="startSpin(event, 'lengde', this)"
+           >
           <div class="card-unit">cm</div>
           <div class="card-info">&nbsp;</div>
         </div>
@@ -734,6 +763,72 @@
       oppdaterKort();
       tegn();
     }
+
+    function kortTast(e, felt, el) {
+      // Enter eller Tab: bekreft og kjør
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        kortEndret(felt, el.value);
+        if (e.key === 'Enter') el.blur();
+        return;
+      }
+      // Piltaster: juster verdi direkte med auto-repeat via spin
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const step = (felt === 'antall') ? 1 : 0.1;
+        const delta = e.key === 'ArrowUp' ? step : -step;
+        const cur = parseFloat(el.value) || 0;
+        const ny = Math.round((cur + delta) * 10) / 10;
+        if (ny <= 0) return;
+        el.value = ny;
+        kortEndret(felt, ny);
+      }
+      // Alle andre taster (siffer, backspace, delete, etc.) — la dem skrive normalt, ingen utregning
+    }
+
+    // Spinner: hold nede pil i number-input → teller automatisk
+    let spinTimer = null;
+    let spinInterval = null;
+    let spinActive = false;
+
+    function startSpin(e, felt, el) {
+      const rect = el.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      if (clickX < rect.width - 20) return;
+
+      e.preventDefault();
+      stopSpin();
+
+      const step = (felt === 'antall') ? 1 : 0.1;
+      const clickY = e.clientY - rect.top;
+      const delta = clickY < rect.height / 2 ? step : -step;
+      spinActive = true;
+
+      function doStep() {
+        if (!spinActive) { stopSpin(); return; }
+        const cur = parseFloat(el.value) || 0;
+        const ny = Math.round((cur + delta) * 10) / 10;
+        if (ny <= 0) { stopSpin(); return; }
+        el.value = ny;
+        kortEndret(felt, ny);
+      }
+
+      doStep();
+      spinTimer = setTimeout(() => {
+        if (spinActive) spinInterval = setInterval(doStep, 80);
+      }, 400);
+    }
+
+    function stopSpin() {
+      spinActive = false;
+      clearTimeout(spinTimer);
+      clearInterval(spinInterval);
+      spinTimer = null;
+      spinInterval = null;
+    }
+
+    // Stop spinner on any mouseup anywhere on the page
+    document.addEventListener('mouseup', stopSpin);
+    document.addEventListener('mouseleave', stopSpin);
 
     function tegn() {
       const state = stairState || { hoydeCm: 70, antall: 5, trinnHoyde: 14, trinnLengde: 30 };
@@ -818,6 +913,18 @@
         reposer.forEach(r2 => { if (r2.etterTrinn < r.etterTrinn) cumulativeRepos += r2.lengde; });
         rx += r.etterTrinn * trinnLengde * sc + cumulativeRepos * sc;
         const ry = offY + (totalHoyCm - r.etterTrinn * trinnHoyde) * sc;
+
+        // Høyde over bakken for dette reposet
+        const hoverBakken = r.etterTrinn * trinnHoyde;
+        const hLabel = 'h=' + (hoverBakken / 100).toFixed(2).replace('.', ',') + ' m';
+
+        // Tegn høyde-label sentrert over repos-flaten
+        ctx.fillStyle = '#8a6e2f';
+        ctx.font = '11px Segoe UI, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(hLabel, rx + r.lengde * sc / 2, ry - 6);
+
+        // Repos lengde-pil og label under
         tegnPilLinje(ctx, rx, ry + labelOffset, rx + r.lengde * sc, ry + labelOffset, '#8a6e2f');
         ctx.fillStyle = '#8a6e2f'; ctx.textAlign = 'center';
         ctx.font = '11px Segoe UI, sans-serif';
